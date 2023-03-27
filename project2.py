@@ -22,6 +22,7 @@ tuples = 0      # number of tuples requested
 '''
 
 # prints parameters for api
+#doesn't seem to be important
 def print_parameters():
     parameters = """\
 Parameters:
@@ -43,7 +44,7 @@ Loading necessary libraries; This should take a minute or so ...\
 
 
 # fetches results from api
-def get_results():
+def get_results(api_key, query, engine_key):
     service = build(
         "customsearch", "v1", developerKey=api_key
     )
@@ -68,7 +69,10 @@ def get_results():
 
 def extract_plaintext(webpage):
     print("Fetching text from url ...")
-    soup = BeautifulSoup(webpage, features="html.parser")
+    r = requests.get(webpage)
+    soup = BeautifulSoup(r.content, features="html.parser")
+    soup = BeautifulSoup(r.content, 'html5lib')
+    print("SOUPPPP\n", soup)
 
     # get rid of non-html elements
     for script in soup(["script", "style", "[document]", "head", "title", "header", "footer", "meta"]):
@@ -185,11 +189,11 @@ def spanbert_classification(candidate_pairs, sentence):
         print("\tSubject: {}\tObject: {}\tRelation: {}\tConfidence: {:.2f}".format(ex["subj"][0], ex["obj"][0], pred[0], pred[1]))
     
 
-def process_urls():
+def process_urls(api_key, query, engine_key):
     global iterations
     # top print tag
     print('=========== Iteration: {} - Query: {} ===========\n\n'.format(iterations, query))
-    urls = get_results()
+    urls = get_results(api_key, query, engine_key)
 
     # processing each individual url
     for i in range(len(urls)):
@@ -247,8 +251,8 @@ if __name__ == "__main__":
     Q.add(query)
 
     # print parameters
-    print_parameters()
+    #print_parameters()
 
     # run iterations until desired tuples extracted
     #while len(X) < tuples:
-    process_urls()
+    process_urls(api_key,query,engine_key)
